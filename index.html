@@ -3,67 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Partnership Sanctuary</title>
+    <title>Partnership | Our Space</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); }
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Outfit', sans-serif; background: #fdf2f8; color: #4c0519; }
+        .card { background: #ffffff; border: 1px solid #ffe4e6; box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.1); }
     </style>
 </head>
-<body class="bg-rose-50 min-h-screen text-rose-950">
+<body class="min-h-screen p-4 md:p-8">
 
-    <div id="gate" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-rose-950/20 backdrop-blur-sm">
-        <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center space-y-6 border border-rose-100">
-            <h1 class="text-2xl font-extrabold text-rose-900">Sanctuary Setup</h1>
-            <div id="setup-step1">
-                <input id="sessInp" placeholder="Sanctuary ID" class="w-full p-4 mb-4 bg-rose-50 rounded-2xl text-center font-bold outline-none border border-rose-100">
-                <input id="p1Name" placeholder="Your Name" class="w-full p-4 mb-4 bg-rose-50 rounded-2xl text-center font-bold outline-none border border-rose-100">
-                <input id="p2Name" placeholder="Partner Name" class="w-full p-4 mb-6 bg-rose-50 rounded-2xl text-center font-bold outline-none border border-rose-100">
-                <button onclick="initializeSanctuary()" class="w-full py-4 bg-rose-500 text-white font-bold rounded-2xl">Enter Sanctuary</button>
+    <!-- Auth View -->
+    <div id="authView" class="max-w-md mx-auto mt-20 card p-10 rounded-[2rem] text-center">
+        <h1 class="text-4xl font-bold mb-2 text-rose-900">Partnership</h1>
+        <p class="text-rose-400 mb-8">Log in to enter your shared space</p>
+        <input id="email" type="email" placeholder="Email" class="w-full p-4 mb-3 bg-rose-50 rounded-2xl border-none">
+        <input id="password" type="password" placeholder="Password" class="w-full p-4 mb-6 bg-rose-50 rounded-2xl border-none">
+        <button id="loginBtn" class="w-full bg-rose-900 text-white py-4 rounded-2xl font-semibold hover:bg-rose-800">Enter Partnership</button>
+    </div>
+
+    <!-- App View -->
+    <div id="appView" class="hidden max-w-5xl mx-auto">
+        <!-- SOS Overlay -->
+        <div id="sosOverlay" class="hidden fixed inset-0 z-50 bg-red-600 flex flex-col items-center justify-center text-white p-8 animate-pulse">
+            <h1 class="text-6xl font-black mb-4">🚨 SOS ALERT 🚨</h1>
+            <p id="sosCoordDisplay" class="text-2xl mb-8 font-medium">Location data loading...</p>
+            <button onclick="document.getElementById('sosOverlay').classList.add('hidden')" class="bg-white text-red-600 px-8 py-4 rounded-2xl font-bold text-xl hover:bg-red-50">Dismiss Alert</button>
+        </div>
+
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h2 class="text-3xl font-bold text-rose-950">Partnership</h2>
+                <p class="text-rose-500">Synced, secure, and private.</p>
             </div>
-            <p id="error" class="text-xs text-rose-400"></p>
+            <button id="logoutBtn" class="px-5 py-2 rounded-full bg-rose-50 text-rose-600 text-sm hover:bg-rose-100">Leave</button>
+        </header>
+
+        <!-- Room Entry Section -->
+        <div id="setupRoom" class="hidden card p-12 rounded-[2rem] text-center max-w-lg mx-auto">
+            <h3 class="text-xl font-bold mb-6 text-rose-900">Initialize Partnership</h3>
+            <input id="roomInput" type="text" placeholder="Room ID" class="w-full p-4 mb-3 bg-rose-50 rounded-2xl">
+            <input id="roomPass" type="password" placeholder="Password" class="w-full p-4 mb-6 bg-rose-50 rounded-2xl">
+            <button id="roomActionBtn" class="w-full bg-rose-900 text-white py-4 rounded-2xl font-semibold hover:bg-rose-800">Join Partnership</button>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="hidden grid grid-cols-1 md:grid-cols-12 gap-8">
+            <div class="md:col-span-4 space-y-6">
+                <div class="card p-6 rounded-[2rem]">
+                    <h3 class="font-bold text-rose-900 mb-4">Partner Status</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="updateStatus('In Meeting')" class="bg-rose-50 p-2 rounded-lg text-xs hover:bg-rose-100">Meeting</button>
+                        <button onclick="updateStatus('In Bath')" class="bg-rose-50 p-2 rounded-lg text-xs hover:bg-rose-100">Bath</button>
+                        <button onclick="updateStatus('Studying')" class="bg-rose-50 p-2 rounded-lg text-xs hover:bg-rose-100">Studying</button>
+                        <button onclick="updateStatus('Online')" class="bg-rose-50 p-2 rounded-lg text-xs hover:bg-rose-100">Online</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-8 card p-8 rounded-[2rem] flex flex-col h-[500px]">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-rose-900">Live Feed</h3>
+                    <div class="flex gap-2">
+                        <button id="coachBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg">AI Coach</button>
+                        <button id="sosBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg">SOS</button>
+                    </div>
+                </div>
+                <div id="chatBox" class="flex-1 bg-rose-50/50 rounded-2xl p-6 mb-4 overflow-y-auto space-y-3"></div>
+                <div class="flex gap-2">
+                    <input id="msgInput" type="text" placeholder="Message..." class="flex-1 p-4 bg-rose-50 rounded-2xl border-none">
+                    <button id="sendBtn" class="bg-rose-900 text-white px-6 py-4 rounded-2xl font-bold">Send</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="app" class="hidden flex h-screen">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-rose-100 p-6 flex flex-col justify-between">
-            <div>
-                <h2 class="font-black text-rose-900 mb-8">SANCTUARY</h2>
-                <nav id="pageNav" class="space-y-2">
-                    <!-- Dynamic links will be injected here -->
-                </nav>
-                <button onclick="addCustomPage()" class="mt-4 w-full text-left text-sm font-bold text-rose-400 hover:text-rose-600">+ Add Page</button>
-            </div>
-            <div id="reminders" class="bg-rose-50 p-4 rounded-2xl text-xs">
-                <h3 class="font-bold mb-2">Reminders</h3>
-                <div id="reminderList" class="space-y-1 text-rose-600"></div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1 p-8 overflow-y-auto">
-            <header class="flex justify-between items-center mb-8">
-                <h1 id="viewTitle" class="text-3xl font-black text-rose-900">Home</h1>
-                <div class="flex gap-4">
-                    <button onclick="setPanic(true)" class="bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-bold">Panic</button>
-                </div>
-            </header>
-
-            <div id="content" class="space-y-6">
-                <textarea id="editor" oninput="saveCurrentPage()" class="w-full h-[60vh] p-8 bg-white rounded-[2rem] shadow-sm border border-rose-100 resize-none outline-none" placeholder="Write here..."></textarea>
-                <div class="bg-white p-6 rounded-[2rem] border border-rose-100">
-                    <input id="msgInput" onkeydown="if(event.key==='Enter') sendMsg()" placeholder="Chat with partner..." class="w-full p-4 bg-rose-50 rounded-2xl">
-                    <div id="chatBox" class="mt-4 space-y-2"></div>
-                </div>
-            </div>
-        </main>
-    </div>
-
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBTnz2pfLZIx23i8RrcZj_u_K0Mlt6_syY",
@@ -74,83 +92,102 @@
             appId: "1:166296175418:web:1a374bfaab63d2f6ff4603"
         };
 
-        const db = getFirestore(initializeApp(firebaseConfig));
-        let sessionId = "", currentView = "Home";
-        let state = { pages: { Home: "" }, chat: [], reminders: [] };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'default-app-id';
+        let currentRoomId = null;
 
-        window.initializeSanctuary = async () => {
-            sessionId = document.getElementById('sessInp').value.trim();
-            const p1 = document.getElementById('p1Name').value.trim();
-            const p2 = document.getElementById('p2Name').value.trim();
-            if(!sessionId || !p1 || !p2) return (document.getElementById('error').innerText = "All fields required");
-            
-            await setDoc(doc(db, 'PartnershipSessions', sessionId), { 
-                partners: { p1, p2 }, pages: { Home: "" }, reminders: [], chat: [] 
-            }, { merge: true });
-            
-            document.getElementById('gate').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            setupSync();
+        onAuthStateChanged(auth, u => {
+            if(u) {
+                document.getElementById('authView').classList.add('hidden');
+                document.getElementById('appView').classList.remove('hidden');
+                checkUserRegistry(u.uid);
+            } else {
+                document.getElementById('authView').classList.remove('hidden');
+                document.getElementById('appView').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('loginBtn').onclick = () => {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            signInWithEmailAndPassword(auth, e, p).catch(() => createUserWithEmailAndPassword(auth, e, p));
         };
+        
+        document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-        window.setupSync = () => {
-            onSnapshot(doc(db, 'PartnershipSessions', sessionId), (snap) => {
-                if(!snap.exists()) return;
-                state = snap.data();
-                renderNav();
-                renderView();
-                renderChat();
-                renderReminders();
+        async function checkUserRegistry(uid) {
+            const snap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms_registry', uid));
+            if(snap.exists()) enterDashboard(snap.data().roomId);
+            else document.getElementById('setupRoom').classList.remove('hidden');
+        }
+
+        async function enterDashboard(id) {
+            currentRoomId = id;
+            document.getElementById('setupRoom').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+
+            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'rooms', id, 'chat'), orderBy('timestamp', 'asc')), (snap) => {
+                const box = document.getElementById('chatBox');
+                box.innerHTML = '';
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    box.innerHTML += `<div class="p-3 bg-white rounded-xl shadow-sm text-sm border border-rose-100"><b>${d.sender}:</b> ${d.text}</div>`;
+                    
+                    if (d.sender === '🚨 SOS') {
+                        document.getElementById('sosCoordDisplay').innerText = d.text;
+                        document.getElementById('sosOverlay').classList.remove('hidden');
+                    }
+                });
+                box.scrollTop = box.scrollHeight;
             });
+        }
+
+        document.getElementById('roomActionBtn').onclick = async () => {
+            const id = document.getElementById('roomInput').value.trim().toUpperCase();
+            const pass = document.getElementById('roomPass').value.trim();
+            if(!id || !pass) return;
+            
+            const rRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', id);
+            const snap = await getDoc(rRef);
+            if(snap.exists() && snap.data().password !== pass) return alert("Wrong Password");
+            
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms_registry', auth.currentUser.uid), { roomId: id });
+            if(!snap.exists()) await setDoc(rRef, { password: pass });
+            enterDashboard(id);
         };
 
-        window.renderNav = () => {
-            const nav = document.getElementById('pageNav');
-            nav.innerHTML = Object.keys(state.pages).map(key => `
-                <button onclick="switchView('${key}')" class="block w-full text-left p-2 rounded-lg font-bold text-rose-900 hover:bg-rose-50">${key}</button>
-            `).join('');
-        };
-
-        window.switchView = (view) => {
-            currentView = view;
-            renderView();
-        };
-
-        window.renderView = () => {
-            document.getElementById('viewTitle').innerText = currentView;
-            document.getElementById('editor').value = state.pages[currentView] || "";
-        };
-
-        window.saveCurrentPage = async () => {
-            await updateDoc(doc(db, 'PartnershipSessions', sessionId), { 
-                [`pages.${currentView}`]: document.getElementById('editor').value 
-            });
-        };
-
-        window.addCustomPage = async () => {
-            const name = prompt("Enter page name (e.g., Travel, Career):");
-            if(name) {
-                await updateDoc(doc(db, 'PartnershipSessions', sessionId), { [`pages.${name}`]: "" });
+        document.getElementById('sendBtn').onclick = async () => {
+            const i = document.getElementById('msgInput');
+            if(i.value) {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId, 'chat'), {
+                    sender: 'You',
+                    text: i.value,
+                    timestamp: serverTimestamp()
+                });
+                i.value = '';
             }
         };
 
-        window.sendMsg = async () => {
-            const input = document.getElementById('msgInput');
-            await updateDoc(doc(db, 'PartnershipSessions', sessionId), { 
-                chat: arrayUnion({ text: input.value, sender: "User", time: new Date().toLocaleTimeString() }) 
-            });
-            input.value = "";
+        document.getElementById('sosBtn').onclick = () => {
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const {latitude, longitude} = pos.coords;
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId, 'chat'), {
+                    sender: '🚨 SOS',
+                    text: `HELP! My location is: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+                    timestamp: serverTimestamp()
+                });
+            }, () => alert("Location access required for SOS."));
         };
 
-        function renderChat() {
-            document.getElementById('chatBox').innerHTML = (state.chat || []).map(m => `
-                <p class="text-xs bg-rose-50 p-2 rounded">${m.text}</p>
-            `).join('');
-        }
-
-        function renderReminders() {
-            document.getElementById('reminderList').innerHTML = (state.reminders || []).map(r => `<p>- ${r}</p>`).join('');
-        }
+        window.updateStatus = async (status) => {
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId, 'chat'), {
+                sender: 'Status',
+                text: `Status updated to: ${status}`,
+                timestamp: serverTimestamp()
+            });
+        };
     </script>
 </body>
 </html>
