@@ -6,40 +6,43 @@
     <title>Partnership Sanctuary</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 </head>
-<body class="bg-[#FDF2F8] min-h-screen font-sans">
+<body class="bg-rose-50 min-h-screen font-sans text-rose-950">
 
-    <!-- Auth Overlay -->
     <div id="authGateOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-rose-950/90 backdrop-blur-xl p-4">
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full shadow-2xl space-y-6 text-center">
             <h1 class="text-2xl font-extrabold text-rose-900">Partnership Hub</h1>
-            <button id="authBtn" onclick="initAuth()" class="w-full py-4 bg-rose-500 text-white font-bold rounded-xl hover:bg-rose-600 transition-all">Enter Sanctuary</button>
+            <p class="text-rose-600 text-sm">Please authorize your session to enter the sanctuary.</p>
+            <button id="authBtn" onclick="initAuth()" class="w-full py-4 bg-rose-500 text-white font-bold rounded-xl hover:bg-rose-600 transition-all shadow-lg shadow-rose-200">Enter Sanctuary</button>
         </div>
     </div>
 
-    <!-- Main Content -->
     <div id="app" class="hidden max-w-4xl mx-auto p-6 space-y-6">
-        <header class="flex items-center justify-between glass p-6 bg-white rounded-3xl shadow-sm border border-rose-100">
+        <header class="flex items-center justify-between p-6 bg-white rounded-3xl shadow-sm border border-rose-100">
             <div>
-                <h1 class="text-2xl font-extrabold text-rose-900">Partnership</h1>
+                <h1 class="text-2xl font-extrabold text-rose-900">Partnership Sanctuary</h1>
                 <p class="text-xs font-bold uppercase tracking-widest text-rose-400">Live Sync Active</p>
             </div>
             <div id="statusIndicator" class="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-200">System Connected</div>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Codeshare -->
+            <!-- Avatar Selection & Shared Pad -->
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-rose-100 space-y-4">
-                <h2 class="font-bold text-slate-800">Shared Pad</h2>
-                <textarea id="editor" oninput="pushCode()" class="w-full h-64 p-4 bg-slate-50 rounded-xl text-sm font-mono focus:ring-2 focus:ring-rose-300 outline-none"></textarea>
+                <div class="flex justify-between items-center">
+                    <h2 class="font-bold text-slate-800">Shared Pad</h2>
+                    <div id="avatarDisplay" class="flex gap-2">
+                        <!-- Avatars will be injected here -->
+                    </div>
+                </div>
+                <textarea id="editor" oninput="pushCode()" class="w-full h-64 p-4 bg-rose-50 rounded-xl text-sm font-mono focus:ring-2 focus:ring-rose-300 outline-none border border-rose-100"></textarea>
             </div>
             
             <!-- Chat -->
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-rose-100 space-y-4">
                 <h2 class="font-bold text-slate-800">Messages</h2>
-                <div id="chatBox" class="h-48 overflow-y-auto space-y-2 text-xs"></div>
-                <input id="msgInput" onkeydown="if(event.key==='Enter') sendMsg()" placeholder="Type a sweet note..." class="w-full p-3 bg-slate-50 rounded-xl text-xs outline-none">
+                <div id="chatBox" class="h-48 overflow-y-auto space-y-2 text-xs border border-rose-50 rounded-xl p-2"></div>
+                <input id="msgInput" onkeydown="if(event.key==='Enter') sendMsg()" placeholder="Type a sweet note..." class="w-full p-3 bg-rose-50 rounded-xl text-xs outline-none border border-rose-100">
             </div>
         </div>
     </div>
@@ -47,33 +50,41 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-        // FIREBASE CONFIG - REPLACE THESE WITH YOUR OWN KEYS
+        // --- REPLACE THESE WITH YOUR ACTUAL KEYS FROM FIREBASE CONSOLE ---
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
-            projectId: "partnership-92fda",
-            authDomain: "partnership-92fda.firebaseapp.com",
-            storageBucket: "partnership-92fda.firebasestorage.app",
-            messagingSenderId: "166296175418",
-            appId: "1:166296175418:web:1a374bfaab63d2f6ff4603"
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Path logic fixed for 'Partnership/shared_state'
+        // Path points to Partnership collection
         const docRef = doc(db, 'Partnership', 'shared_state');
+
+        // Simple Avatar SVGs
+        const avatars = [
+            '<svg class="w-8 h-8 rounded-full bg-blue-100 p-1" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#bfdbfe"/><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#1e40af"/></svg>',
+            '<svg class="w-8 h-8 rounded-full bg-pink-100 p-1" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fbcfe8"/><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#9d174d"/></svg>'
+        ];
 
         window.initAuth = async () => {
             try {
                 await signInAnonymously(auth);
                 document.getElementById('authGateOverlay').classList.add('hidden');
                 document.getElementById('app').classList.remove('hidden');
+                document.getElementById('avatarDisplay').innerHTML = avatars.join('');
                 setupRealTimeSync();
             } catch (e) {
-                alert("Auth Error: " + e.message);
+                console.error("Auth Error:", e);
+                alert("Auth Error: " + e.message + ". Check your API Keys.");
             }
         };
 
@@ -82,11 +93,10 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     if (document.activeElement.id !== 'editor') document.getElementById('editor').value = data.code || "";
-                    renderChat(data.chat || []);
+                    if(data.chat) renderChat(data.chat);
                 }
             }, (err) => {
-                console.error("Error setting up real-time sync:", err);
-                alert("Permission error. Ensure Firestore Rules are published.");
+                console.error("Permission error:", err);
             });
         }
 
@@ -98,14 +108,17 @@
             const input = document.getElementById('msgInput');
             if(!input.value) return;
             const msg = { sender: 'Partner', text: input.value, time: new Date().toLocaleTimeString() };
-            // Simple update logic (would require reading previous chat first in a real production app)
-            await updateDoc(docRef, { chat: [msg] });
+            // Fetch then append (simplified)
+            const snap = await getDoc(docRef);
+            const chat = snap.exists() ? (snap.data().chat || []) : [];
+            await setDoc(docRef, { ...snap.data(), chat: [...chat, msg] });
             input.value = "";
         };
 
         function renderChat(chat) {
             const box = document.getElementById('chatBox');
-            box.innerHTML = chat.map(m => `<div class="p-2 bg-rose-50 rounded-lg"><b>${m.sender}:</b> ${m.text}</div>`).join('');
+            box.innerHTML = chat.map(m => `<div class="p-2 bg-rose-50 rounded-lg text-xs"><b>${m.sender}:</b> ${m.text}</div>`).join('');
+            box.scrollTop = box.scrollHeight;
         }
     </script>
 </body>
