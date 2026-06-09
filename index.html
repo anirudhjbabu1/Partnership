@@ -52,14 +52,13 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-        // --- REPLACE THESE WITH YOUR ACTUAL KEYS FROM FIREBASE CONSOLE ---
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyBTnz2pfLZIx23i8RrcZj_u_K0Mlt6_syY",
+            authDomain: "partnership-92fda.firebaseapp.com",
+            projectId: "partnership-92fda",
+            storageBucket: "partnership-92fda.firebasestorage.app",
+            messagingSenderId: "166296175418",
+            appId: "1:166296175418:web:1a374bfaab63d2f6ff4603"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -84,7 +83,7 @@
                 setupRealTimeSync();
             } catch (e) {
                 console.error("Auth Error:", e);
-                alert("Auth Error: " + e.message + ". Check your API Keys.");
+                alert("Auth Error: " + e.message);
             }
         };
 
@@ -108,7 +107,6 @@
             const input = document.getElementById('msgInput');
             if(!input.value) return;
             const msg = { sender: 'Partner', text: input.value, time: new Date().toLocaleTimeString() };
-            // Fetch then append (simplified)
             const snap = await getDoc(docRef);
             const chat = snap.exists() ? (snap.data().chat || []) : [];
             await setDoc(docRef, { ...snap.data(), chat: [...chat, msg] });
