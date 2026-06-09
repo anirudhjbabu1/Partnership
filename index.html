@@ -9,6 +9,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Outfit', sans-serif; background: #fdf2f8; color: #4c0519; }
         .card { background: #ffffff; border: 1px solid #ffe4e6; box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.1); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
@@ -27,7 +29,7 @@
         <!-- SOS Overlay -->
         <div id="sosOverlay" class="hidden fixed inset-0 z-50 bg-red-600 flex flex-col items-center justify-center text-white p-8 animate-pulse">
             <h1 class="text-6xl font-black mb-4">🚨 SOS ALERT 🚨</h1>
-            <p id="sosCoordDisplay" class="text-2xl mb-8 font-medium">Location data loading...</p>
+            <p id="sosCoordDisplay" class="text-2xl mb-8 font-medium">Emergency signal received!</p>
             <button onclick="document.getElementById('sosOverlay').classList.add('hidden')" class="bg-white text-red-600 px-8 py-4 rounded-2xl font-bold text-xl hover:bg-red-50">Dismiss Alert</button>
         </div>
 
@@ -39,6 +41,13 @@
             <button id="logoutBtn" class="px-5 py-2 rounded-full bg-rose-50 text-rose-600 text-sm hover:bg-rose-100">Leave</button>
         </header>
 
+        <!-- Tabs Navigation -->
+        <div class="flex gap-4 mb-6">
+            <button onclick="showTab('chatTab')" class="px-6 py-2 rounded-full bg-rose-900 text-white font-semibold">Chat</button>
+            <button onclick="showTab('remindersTab')" class="px-6 py-2 rounded-full bg-white text-rose-900 font-semibold border border-rose-100">Reminders</button>
+            <button onclick="showTab('calendarTab')" class="px-6 py-2 rounded-full bg-white text-rose-900 font-semibold border border-rose-100">Calendar</button>
+        </div>
+
         <!-- Room Entry Section -->
         <div id="setupRoom" class="hidden card p-12 rounded-[2rem] text-center max-w-lg mx-auto">
             <h3 class="text-xl font-bold mb-6 text-rose-900">Initialize Partnership</h3>
@@ -48,32 +57,52 @@
         </div>
 
         <!-- Dashboard -->
-        <div id="dashboard" class="hidden grid grid-cols-1 md:grid-cols-12 gap-8">
-            <div class="md:col-span-4 space-y-6">
-                <div class="card p-6 rounded-[2rem]">
-                    <h3 class="font-bold text-rose-900 mb-4">Partner Status</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="updateStatus('In Meeting')" class="bg-rose-50 p-2 rounded-lg text-xs hover:bg-rose-100">Meeting</button>
-                        <button onclick="updateStatus('In Bath')" class="bg-rose-50 p-2 rounded-lg text-xs hover:bg-rose-100">Bath</button>
-                        <button onclick="updateStatus('Studying')" class="bg-rose-50 p-2 rounded-lg text-xs hover:bg-rose-100">Studying</button>
-                        <button onclick="updateStatus('Online')" class="bg-rose-50 p-2 rounded-lg text-xs hover:bg-rose-100">Online</button>
+        <div id="dashboard" class="hidden">
+            <!-- Chat Tab -->
+            <div id="chatTab" class="tab-content active grid grid-cols-1 md:grid-cols-12 gap-8">
+                <div class="md:col-span-4 space-y-6">
+                    <div class="card p-6 rounded-[2rem]">
+                        <h3 class="font-bold text-rose-900 mb-4">Quick Status</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="updateStatus('In Meeting')" class="bg-rose-50 p-2 rounded-lg text-xs hover:bg-rose-100">Meeting</button>
+                            <button onclick="updateStatus('In Bath')" class="bg-rose-50 p-2 rounded-lg text-xs hover:bg-rose-100">Bath</button>
+                            <button onclick="updateStatus('Studying')" class="bg-rose-50 p-2 rounded-lg text-xs hover:bg-rose-100">Studying</button>
+                            <button onclick="updateStatus('Online')" class="bg-rose-50 p-2 rounded-lg text-xs hover:bg-rose-100">Online</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:col-span-8 card p-8 rounded-[2rem] flex flex-col h-[500px]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-rose-900">Live Feed</h3>
+                        <button id="sosBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg">SOS</button>
+                    </div>
+                    <div id="chatBox" class="flex-1 bg-rose-50/50 rounded-2xl p-6 mb-4 overflow-y-auto space-y-3"></div>
+                    <div class="flex gap-2">
+                        <input id="msgInput" type="text" placeholder="Message..." class="flex-1 p-4 bg-rose-50 rounded-2xl border-none">
+                        <button id="sendBtn" class="bg-rose-900 text-white px-6 py-4 rounded-2xl font-bold">Send</button>
                     </div>
                 </div>
             </div>
 
-            <div class="md:col-span-8 card p-8 rounded-[2rem] flex flex-col h-[500px]">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-rose-900">Live Feed</h3>
-                    <div class="flex gap-2">
-                        <button id="coachBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg">AI Coach</button>
-                        <button id="sosBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg">SOS</button>
-                    </div>
+            <!-- Reminders Tab -->
+            <div id="remindersTab" class="tab-content card p-8 rounded-[2rem]">
+                <h3 class="text-2xl font-bold text-rose-900 mb-6">Reminders</h3>
+                <div class="flex gap-2 mb-6">
+                    <input id="remInput" type="text" placeholder="New reminder..." class="flex-1 p-4 bg-rose-50 rounded-2xl">
+                    <button id="addRemBtn" class="bg-rose-900 text-white px-6 py-4 rounded-2xl font-bold">Add</button>
                 </div>
-                <div id="chatBox" class="flex-1 bg-rose-50/50 rounded-2xl p-6 mb-4 overflow-y-auto space-y-3"></div>
-                <div class="flex gap-2">
-                    <input id="msgInput" type="text" placeholder="Message..." class="flex-1 p-4 bg-rose-50 rounded-2xl border-none">
-                    <button id="sendBtn" class="bg-rose-900 text-white px-6 py-4 rounded-2xl font-bold">Send</button>
+                <div id="remList" class="space-y-2"></div>
+            </div>
+
+            <!-- Calendar Tab -->
+            <div id="calendarTab" class="tab-content card p-8 rounded-[2rem]">
+                <h3 class="text-2xl font-bold text-rose-900 mb-6">Calendar Events</h3>
+                <div class="flex gap-2 mb-6">
+                    <input id="eventInput" type="text" placeholder="Event description..." class="flex-1 p-4 bg-rose-50 rounded-2xl">
+                    <input id="dateInput" type="date" class="p-4 bg-rose-50 rounded-2xl">
+                    <button id="addEventBtn" class="bg-rose-900 text-white px-6 py-4 rounded-2xl font-bold">Add</button>
                 </div>
+                <div id="eventList" class="space-y-2"></div>
             </div>
         </div>
     </div>
@@ -83,6 +112,7 @@
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // ... existing code ... (firebaseConfig)
         const firebaseConfig = {
             apiKey: "AIzaSyBTnz2pfLZIx23i8RrcZj_u_K0Mlt6_syY",
             authDomain: "partnership-92fda.firebaseapp.com",
@@ -91,12 +121,16 @@
             messagingSenderId: "166296175418",
             appId: "1:166296175418:web:1a374bfaab63d2f6ff4603"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = 'default-app-id';
         let currentRoomId = null;
+
+        window.showTab = (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        };
 
         onAuthStateChanged(auth, u => {
             if(u) {
@@ -109,6 +143,35 @@
             }
         });
 
+        async function enterDashboard(id) {
+            currentRoomId = id;
+            document.getElementById('setupRoom').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+
+            // Listen for Chat with filtered SOS logic
+            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'rooms', id, 'chat'), orderBy('timestamp', 'asc')), (snap) => {
+                const box = document.getElementById('chatBox');
+                box.innerHTML = '';
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        const d = change.doc.data();
+                        if (d.sender === '🚨 SOS') {
+                            document.getElementById('sosCoordDisplay').innerText = d.text;
+                            document.getElementById('sosOverlay').classList.remove('hidden');
+                        }
+                    }
+                });
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    box.innerHTML += `<div class="p-3 bg-white rounded-xl shadow-sm text-sm border border-rose-100"><b>${d.sender}:</b> ${d.text}</div>`;
+                });
+                box.scrollTop = box.scrollHeight;
+            });
+            
+            // Listen for Reminders/Events (placeholder logic for now - could add real listeners)
+        }
+
+        // ... existing button handlers ...
         document.getElementById('loginBtn').onclick = () => {
             const e = document.getElementById('email').value;
             const p = document.getElementById('password').value;
@@ -123,36 +186,13 @@
             else document.getElementById('setupRoom').classList.remove('hidden');
         }
 
-        async function enterDashboard(id) {
-            currentRoomId = id;
-            document.getElementById('setupRoom').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-
-            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'rooms', id, 'chat'), orderBy('timestamp', 'asc')), (snap) => {
-                const box = document.getElementById('chatBox');
-                box.innerHTML = '';
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    box.innerHTML += `<div class="p-3 bg-white rounded-xl shadow-sm text-sm border border-rose-100"><b>${d.sender}:</b> ${d.text}</div>`;
-                    
-                    if (d.sender === '🚨 SOS') {
-                        document.getElementById('sosCoordDisplay').innerText = d.text;
-                        document.getElementById('sosOverlay').classList.remove('hidden');
-                    }
-                });
-                box.scrollTop = box.scrollHeight;
-            });
-        }
-
         document.getElementById('roomActionBtn').onclick = async () => {
             const id = document.getElementById('roomInput').value.trim().toUpperCase();
             const pass = document.getElementById('roomPass').value.trim();
             if(!id || !pass) return;
-            
             const rRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', id);
             const snap = await getDoc(rRef);
-            if(snap.exists() && snap.data().password !== pass) return alert("Wrong Password");
-            
+            if(snap.exists() && snap.data().password !== pass) return;
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms_registry', auth.currentUser.uid), { roomId: id });
             if(!snap.exists()) await setDoc(rRef, { password: pass });
             enterDashboard(id);
@@ -162,9 +202,7 @@
             const i = document.getElementById('msgInput');
             if(i.value) {
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId, 'chat'), {
-                    sender: 'You',
-                    text: i.value,
-                    timestamp: serverTimestamp()
+                    sender: 'You', text: i.value, timestamp: serverTimestamp()
                 });
                 i.value = '';
             }
@@ -174,19 +212,34 @@
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const {latitude, longitude} = pos.coords;
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId, 'chat'), {
-                    sender: '🚨 SOS',
-                    text: `HELP! My location is: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
-                    timestamp: serverTimestamp()
+                    sender: '🚨 SOS', text: `HELP! My location is: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`, timestamp: serverTimestamp()
                 });
-            }, () => alert("Location access required for SOS."));
+            });
         };
 
         window.updateStatus = async (status) => {
             await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId, 'chat'), {
-                sender: 'Status',
-                text: `Status updated to: ${status}`,
-                timestamp: serverTimestamp()
+                sender: 'Status', text: `Status updated to: ${status}`, timestamp: serverTimestamp()
             });
+        };
+
+        // Add Reminder logic
+        document.getElementById('addRemBtn').onclick = () => {
+            const val = document.getElementById('remInput').value;
+            if(!val) return;
+            const list = document.getElementById('remList');
+            list.innerHTML += `<div class="p-4 bg-white rounded-2xl shadow-sm border border-rose-100">${val}</div>`;
+            document.getElementById('remInput').value = '';
+        };
+
+        // Add Event logic
+        document.getElementById('addEventBtn').onclick = () => {
+            const desc = document.getElementById('eventInput').value;
+            const date = document.getElementById('dateInput').value;
+            if(!desc || !date) return;
+            const list = document.getElementById('eventList');
+            list.innerHTML += `<div class="p-4 bg-white rounded-2xl shadow-sm border border-rose-100 flex justify-between"><span>${desc}</span><span class="text-rose-400 font-bold">${date}</span></div>`;
+            document.getElementById('eventInput').value = '';
         };
     </script>
 </body>
